@@ -6,12 +6,18 @@ import static fi.iki.elonen.NanoHTTPD.newFixedLengthResponse;
 import android.os.SystemClock;
 import android.text.TextUtils;
 
+import com.github.catvod.crawler.SpiderDebug;
 import com.github.catvod.net.OkHttp;
 import com.github.catvod.spider.Proxy;
+import com.orhanobut.logger.Logger;
 
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -43,16 +49,26 @@ public class ProxyVideo {
         return String.format(Locale.getDefault(), "%s?url=%s&thread=%d", GO_SERVER, URLEncoder.encode(url), thread);
     }
 
-    public static NanoHTTPD.Response proxy(String url, Map<String, String> headers) throws Exception {
+    public static Object[] proxy(String url, Map<String, String> headers) throws Exception {
+        Object[] temp = new Object[4];
         Response response = OkHttp.newCall(url, headers);
+        SpiderDebug.log("proxy url" + url  + " headers: " + headers.toString());
         String contentType = response.headers().get("Content-Type");
         String hContentLength = response.headers().get("Content-Length");
         String contentDisposition = response.headers().get("Content-Disposition");
         long contentLength = hContentLength != null ? Long.parseLong(hContentLength) : 0;
         if (contentDisposition != null) contentType = getMimeType(contentDisposition);
-        NanoHTTPD.Response resp = newFixedLengthResponse(Status.PARTIAL_CONTENT, contentType, response.body().byteStream(), contentLength);
-        for (String key : response.headers().names()) resp.addHeader(key, response.headers().get(key));
-        return resp;
+        Map oHeaders = new HashMap();
+        List<String> arr = Arrays.asList("Accept-Ranges","Content-Range");
+//        oHeaders.put("Accept-Ranges", "bytes");
+//        oHeaders.put("Content-Range", response.headers().get("Content-Range"));
+//        NanoHTTPD.Response resp = newFixedLengthResponse(Status.PARTIAL_CONTENT, contentType, response.body().byteStream(), contentLength);
+        for (String key : response.headers().names()) oHeaders.put(key, response.headers().get(key));
+        temp[0] = Status.PARTIAL_CONTENT.getRequestStatus();
+        temp[1] = contentType;
+        temp[2] = response.body().byteStream();
+        temp[3] = oHeaders;
+        return temp;
     }
 
     private static String getMimeType(String contentDisposition) {

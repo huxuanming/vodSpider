@@ -20,7 +20,7 @@ public class Proxy extends Spider {
             case "bili":
                 return Bili.proxy(params);
             case "webdav":
-                return WebDAV.vod(params);
+                return XWebDav.vod(params);
             default:
                 return null;
         }

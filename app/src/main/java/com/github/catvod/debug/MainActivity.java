@@ -6,8 +6,10 @@ import android.widget.Button;
 
 import com.github.catvod.R;
 import com.github.catvod.crawler.Spider;
+import com.github.catvod.spider.Eighteen;
 import com.github.catvod.spider.Init;
 import com.github.catvod.spider.PTT;
+import com.github.catvod.spider.Wogg;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 
@@ -46,7 +48,7 @@ public class MainActivity extends Activity {
     private void initSpider() {
         try {
             Init.init(getApplicationContext());
-            spider = new PTT();
+            spider = new Wogg();
             spider.init(this, "");
         } catch (Throwable e) {
             e.printStackTrace();
@@ -82,7 +84,7 @@ public class MainActivity extends Activity {
 
     public void detailContent() {
         try {
-            Logger.t("detailContent").d(spider.detailContent(Arrays.asList("245424")));
+            Logger.t("detailContent").d(spider.detailContent(Arrays.asList("/voddetail/76617.html")));
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -90,7 +92,7 @@ public class MainActivity extends Activity {
 
     public void playerContent() {
         try {
-            Logger.t("playerContent").d(spider.playerContent("", "382044/1/78", new ArrayList<>()));
+            Logger.t("playerContent").d(spider.playerContent("阿里云盘", "bsqnngYRh2m+6692070adbcd031c04704b19ac6514cf7d4f0bfb", new ArrayList<>()));
         } catch (Throwable e) {
             e.printStackTrace();
         }

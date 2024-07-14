@@ -1,6 +1,7 @@
 package com.github.catvod.spider;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.github.catvod.bean.Class;
 import com.github.catvod.bean.Result;
@@ -98,11 +99,17 @@ public class Wogg extends Ali {
         item.setVodPic(doc.selectFirst(".module-item-pic img").attr("data-src"));
         item.setVodArea(doc.select(".video-info-header a.tag-link").last().text());
         item.setTypeName(String.join(",", doc.select(".video-info-header div.tag-link a").eachText()));
-
+        List<String> shareNames = doc.select(".module-tab-items .module-tab-item span").eachText();
         List<String> shareLinks = doc.select(".module-row-text").eachAttr("data-clipboard-text");
         for (int i = 0; i < shareLinks.size(); i++) shareLinks.set(i, shareLinks.get(i).trim());
 
-        item.setVodPlayFrom(detailContentVodPlayFrom(shareLinks));
+        List<String> groups =  new ArrayList<>();
+        for (int i = 0; i < shareNames.size(); i++) {
+            if (shareNames.get(i).contains("阿里")) {
+                groups.add(shareNames.get(i) + (groups.size() + 1));
+            }
+        }
+        item.setVodPlayFrom(TextUtils.join("$$$", groups));
         item.setVodPlayUrl(detailContentVodPlayUrl(shareLinks));
 
         Elements elements = doc.select(".video-info-item");

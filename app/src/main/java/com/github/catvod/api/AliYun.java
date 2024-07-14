@@ -249,19 +249,17 @@ public class AliYun {
         List<Item> subs = new ArrayList<>();
         listFiles(shareId, new Item(getParentFileId(fileId, share)), files, subs);
         Collections.sort(files);
-        List<String> playFrom = Arrays.asList("轉存原畫", "分享原畫", "代理普畫");
         List<String> episode = new ArrayList<>();
-        List<String> playUrl = new ArrayList<>();
         for (Item file : files) episode.add(file.getDisplayName() + "$" + shareId + "+" + file.getFileId() + findSubs(file.getName(), subs));
-        for (int i = 0; i < playFrom.size(); i++) playUrl.add(TextUtils.join("#", episode));
+        String playUrl = TextUtils.join("#", episode);
         Vod vod = new Vod();
         vod.setVodId(url);
         vod.setVodContent(url);
         vod.setVodPic(share.getAvatar());
         vod.setVodName(share.getShareName());
-        vod.setVodPlayUrl(TextUtils.join("$$$", playUrl));
-        vod.setVodPlayFrom(TextUtils.join("$$$", playFrom));
-        vod.setTypeName("阿里雲盤");
+        vod.setVodPlayUrl(playUrl);
+//        vod.setVodPlayFrom(TextUtils.join("$$$", playFrom));
+        vod.setTypeName("阿里云盘");
         return vod;
     }
 
@@ -401,7 +399,7 @@ public class AliYun {
         } else if (flag.split("#")[0].equals("分享原畫")) {
             return Result.get().url(proxyVideoUrl("share", ids[0], ids[1])).octet().subs(getSubs(ids)).header(getHeader()).string();
         } else {
-            return "";
+            return Result.get().url(proxyVideoUrl("open", ids[0], ids[1])).octet().subs(getSubs(ids)).header(getHeader()).string();
         }
     }
 
@@ -455,7 +453,8 @@ public class AliYun {
     }
 
     private String proxyVideoUrl(String cate, String shareId, String fileId) {
-        return String.format(Proxy.getUrl() + "?do=ali&type=video&cate=%s&shareId=%s&fileId=%s", cate, shareId, fileId);
+        return  getDownloadUrl(shareId, fileId);
+//        return String.format(Proxy.getUrl() + "?do=ali&type=video&cate=%s&shareId=%s&fileId=%s", cate, shareId, fileId);
     }
 
     private String proxyVideoUrl(String cate, String shareId, String fileId, String templateId) {
@@ -507,7 +506,8 @@ public class AliYun {
         Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         List<String> keys = Arrays.asList("referer", "icy-metadata", "range", "connection", "accept-encoding", "user-agent");
         for (String key : params.keySet()) if (keys.contains(key)) headers.put(key, params.get(key));
-        return new Object[]{ProxyVideo.proxy(downloadUrl, headers)};
+        SpiderDebug.log("downloadUrl:" + downloadUrl );
+        return ProxyVideo.proxy(downloadUrl, headers);
     }
 
     private String getM3u8Url(String shareId, String fileId, String templateId) {
